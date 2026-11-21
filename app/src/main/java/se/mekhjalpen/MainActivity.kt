@@ -12,6 +12,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,10 +60,18 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         web = WebView(this)
-        setContentView(web)
+        val container = FrameLayout(this)
+        container.addView(
+            web,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
+        setContentView(container)
 
         // Håll innehållet utanför statusfält, gestfält, hålkamera och tangentbord
-        ViewCompat.setOnApplyWindowInsetsListener(web) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(container) { v, insets ->
             val b = insets.getInsets(
                 WindowInsetsCompat.Type.systemBars()
                     or WindowInsetsCompat.Type.displayCutout()
