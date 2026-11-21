@@ -1,0 +1,151 @@
+package se.mekhjalpen
+
+import android.annotation.SuppressLint
+import android.net.Uri
+import android.os.Bundle
+import android.print.PrintAttributes
+import android.print.PrintManager
+import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.webkit.WebViewAssetLoader
+import java.io.File
+
+// Gör att window.print() i appen går via Androids utskriftstjänst
+// med rätt etikettstorlek (läses ur @page size i sidan).
+private const val PRINT_JS = """
+window.print=function(){
+  var m=/size:\s*(\d+)mm\s+(\d+)mm/.exec((document.getElementById('pagestyle')||{}).textContent||'');
+  Android.print(m?+m[1]:62,m?+m[2]:29);
+};
+"""
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var web: WebView
+    private var fileCallback: ValueCallback<Array<Uri>>? = null
+    private var cameraUri: Uri? = null
+
+    private val cameraLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+            val uri = cameraUri
+            fileCallback?.onReceiveValue(if (ok && uri != null) arrayOf(uri) else null)
+            fileCallback = null
+        }
+
+    private val pickLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+            fileCallback?.onReceiveValue(
+                WebChromeClient.FileChooserParams.parseResult(r.resultCode, r.data)
+            )
+            fileCallback = null
+        }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Kant-till-kant (Android 15 på Pixel 9 Pro), transparenta systemfält
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+        web = WebView(this)
+        setContentView(web)
+
+        // Håll innehållet utanför statusfält, gestfält, hålkamera och tangentbord
+        ViewCompat.setOnApplyWindowInsetsListener(web) { v, insets ->
+            val b = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                    or WindowInsetsCompat.Type.displayCutout()
+                    or WindowInsetsCompat.Type.ime()
+            )
+            v.setPadding(b.left, b.top, b.right, b.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+
+        web.settings.javaScriptEnabled = true
+        web.settings.domStorageEnabled = true
+        web.settings.allowFileAccess = false
+        web.settings.allowContentAccess = true
+        web.settings.setSupportZoom(false)
+
+        val loader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+
+        web.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(
+                view: WebView,
+                request: WebResourceRequest
+            ): WebResourceResponse? = loader.shouldInterceptRequest(request.url)
+
+            override fun onPageFinished(view: WebView, url: String?) {
+                view.evaluateJavascript(PRINT_JS, null)
+            }
+        }
+
+        web.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView,
+                callback: ValueCallback<Array<Uri>>,
+                params: FileChooserParams
+            ): Boolean {
+                fileCallback?.onReceiveValue(null)
+                fileCallback = callback
+                if (params.isCaptureEnabled) {
+                    val dir = File(cacheDir, "images").apply { mkdirs() }
+                    val f = File.createTempFile("del_", ".jpg", dir)
+                    val uri = FileProvider.getUriForFile(
+                        this@MainActivity, "$packageName.fileprovider", f
+                    )
+                    cameraUri = uri
+                    cameraLauncher.launch(uri)
+                } else {
+                    pickLauncher.launch(params.createIntent())
+                }
+                return true
+            }
+        }
+
+        web.addJavascriptInterface(Bridge(), "Android")
+        web.loadUrl("https://appassets.androidplatform.net/assets/index.html")
+
+        // Bakåtgest: stäng formulär/dialog först, avsluta först när inget är öppet
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                web.evaluateJavascript("(window.__back&&window.__back())||false") { r ->
+                    if (r != "true") finish()
+                }
+            }
+        })
+    }
+
+    inner class Bridge {
+        @JavascriptInterface
+        fun print(wMm: Int, hMm: Int) {
+            runOnUiThread {
+                val pm = getSystemService(PRINT_SERVICE) as PrintManager
+                val wMils = (wMm / 25.4 * 1000).toInt()
+                val hMils = (hMm / 25.4 * 1000).toInt()
+                var size = PrintAttributes.MediaSize(
+                    "LABEL_${wMm}x$hMm", "Etikett $wMm x $hMm mm",
+                    minOf(wMils, hMils), maxOf(wMils, hMils)
+                )
+                if (wMm > hMm) size = size.asLandscape()
+                val attrs = PrintAttributes.Builder()
+                    .setMediaSize(size)
+                    .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+                    .build()
+                pm.print("Mek-hjälpen etikett", web.createPrintDocumentAdapter("etikett"), attrs)
+            }
+        }
+    }
+}

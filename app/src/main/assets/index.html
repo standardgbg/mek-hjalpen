@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mek-hjälpen</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1d1d1b;--mut:#6b6a64;--ac:#c2410c;--acx:#fff;--bd:#e3e1d8;--bgt:rgba(246,245,241,.78);--glow:rgba(194,65,12,.16);--glow2:rgba(37,99,235,.10);--grid:rgba(60,50,30,.06);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--card:#222220;--tx:#f0efe9;--mut:#a09f97;--ac:#fb923c;--acx:#1a1a18;--bd:#363633;--bgt:rgba(23,23,22,.78);--glow:rgba(251,146,60,.18);--glow2:rgba(56,189,248,.10);--grid:rgba(255,255,255,.045)}}
+:root[data-theme="dark"]{--bg:#171716;--card:#222220;--tx:#f0efe9;--mut:#a09f97;--ac:#fb923c;--acx:#1a1a18;--bd:#363633;--bgt:rgba(23,23,22,.78);--glow:rgba(251,146,60,.18);--glow2:rgba(56,189,248,.10);--grid:rgba(255,255,255,.045)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;background-color:var(--bg);background-image:radial-gradient(900px 520px at 100% -10%,var(--glow),transparent 60%),radial-gradient(760px 520px at -10% 105%,var(--glow2),transparent 60%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:auto,auto,28px 28px,28px 28px;background-attachment:fixed}
+body::after{--g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23c2410c' stroke-opacity='.11'%3E%3Ccircle cx='100' cy='100' r='84' stroke-width='16' stroke-dasharray='11 11'/%3E%3Ccircle cx='100' cy='100' r='74' stroke-width='12'/%3E%3Ccircle cx='100' cy='100' r='28' stroke-width='10'/%3E%3C/g%3E%3C/svg%3E");content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--g) no-repeat right -90px bottom -70px/340px,var(--g) no-repeat left -120px top 38%/240px}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bgt);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:14px 0 8px;z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bgt);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);z-index:6}
+h1{margin:0 0 10px;font-size:24px;font-weight:800;letter-spacing:-.01em;background:linear-gradient(90deg,var(--ac),#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+input,textarea,select{width:100%;padding:13px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
+main.wrap{padding-top:4px;padding-bottom:100px}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px}
+html{overscroll-behavior:none}
+body{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input[type=search]{-webkit-appearance:none;appearance:none}
+#q{text-align:center;min-height:50px}
+#q::placeholder{text-align:center}
+.prow select{text-align:center;text-align-last:center}
+header h1{text-align:center}
+.prow{display:flex;gap:6px;margin-bottom:8px}
+.prow select{flex:1;font-weight:600;min-width:0;min-height:50px;font-size:17px}
+.prow .btn{min-width:50px;min-height:50px;padding:8px 12px;font-size:20px}
+.item{box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;margin-bottom:10px;align-items:center}
+.th{width:68px;height:68px;border-radius:8px;background:var(--bd);object-fit:cover;flex:none;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:12px;text-align:center}
+.id{color:var(--ac);font-weight:700;font-size:13px}
+.nm{font-weight:600}.mt{color:var(--mut);font-size:14px}
+.grow{flex:1;min-width:0}
+.fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:64px;height:64px;border-radius:32px;border:0;background:var(--ac);color:var(--acx);font-size:32px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+button{font:inherit;cursor:pointer}
+.btn{min-height:48px;padding:12px 16px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+.btn.p{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:600}
+.btn.d{color:#dc2626}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:10;overflow:auto}
+#ov.on{display:block}
+#sheet{background:var(--bg);margin:0 auto;max-width:640px;min-height:100%;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 30px}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+.row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+#prev{max-width:100%;max-height:220px;border-radius:10px;margin-top:8px;display:none}
+.empty{text-align:center;color:var(--mut);margin-top:60px}
+#dg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:30;align-items:center;justify-content:center;padding:20px}
+#dg.on{display:flex}
+#dgc{background:var(--bg);border-radius:14px;padding:18px;width:100%;max-width:380px}
+#dgc h2{margin:0 0 6px;font-size:18px}
+#dgm{color:var(--mut);margin:0 0 10px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:10px;display:none;z-index:40;max-width:90%}
+#label{display:none}
+@media print{
+  body>*:not(#label){display:none!important}
+  body{background:#fff}
+  body::before,body::after{display:none!important}
+  #label{display:flex!important;color:#000;background:#fff;overflow:hidden;font-family:Arial,sans-serif;padding:1.5mm;gap:2mm;align-items:center;width:100vw;height:100vh}
+  #label img{height:100%;max-width:40%;object-fit:cover;filter:grayscale(1) contrast(1.3)}
+  #label .lid{font-size:9mm;font-weight:800;line-height:1}
+  #label .ln{font-size:4.5mm;font-weight:700;line-height:1.1;margin-top:1mm}
+  #label .lm{font-size:3.3mm;line-height:1.15;margin-top:.6mm}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Mek-hjälpen</h1>
+  <div class="prow">
+    <select id="proj" aria-label="Projekt"></select>
+    <button class="btn" id="pnew" aria-label="Nytt projekt">＋</button>
+    <button class="btn" id="pren" aria-label="Byt namn på projekt">✎</button>
+    <button class="btn d" id="pdel" aria-label="Radera projekt">🗑</button>
+  </div>
+  <input id="q" type="search" placeholder="Sök i projektet (namn, plats, nummer)…">
+</div></header>
+<main id="list" class="wrap"></main>
+<button class="fab" id="add" aria-label="Ny del">+</button>
+
+<div id="ov"><div id="sheet">
+  <h1 id="ttl">Ny del</h1>
+  <div class="mt" id="f_pj"></div>
+  <label>Del</label><input id="f_name" placeholder="t.ex. Kondensator 470µF">
+  <label>Förvaras i (låda/hylla)</label><input id="f_loc" placeholder="t.ex. Låda B3">
+  <label>Anteckning</label><textarea id="f_note" rows="3"></textarea>
+  <label>Bild (valfritt, tas med kameran)</label>
+  <input id="f_img" type="file" accept="image/*" capture="environment">
+  <img id="prev" alt="">
+  <label>Etikettstorlek</label>
+  <select id="f_size">
+    <option value="62x29">62 × 29 mm (Brother DK-11209)</option>
+    <option value="50x30">50 × 30 mm</option>
+    <option value="40x30">40 × 30 mm</option>
+    <option value="57x32">57 × 32 mm (Dymo)</option>
+    <option value="89x36">89 × 36 mm (adress)</option>
+  </select>
+  <label><input id="f_pimg" type="checkbox" style="width:auto"> Ta med bilden på etiketten</label>
+  <div class="row">
+    <button class="btn p" id="save">Spara</button>
+    <button class="btn" id="saveprint">Spara &amp; skriv ut</button>
+    <button class="btn" id="cancel">Avbryt</button>
+    <button class="btn d" id="del">Radera</button>
+  </div>
+</div></div>
+
+<div id="dg"><div id="dgc">
+  <h2 id="dgt"></h2><p id="dgm"></p>
+  <input id="dgi">
+  <div class="row"><button class="btn p" id="dgok">OK</button><button class="btn" id="dgno">Avbryt</button></div>
+</div></div>
+<div id="toast"></div>
+<div id="label"></div>
+<style id="pagestyle"></style>
+
+<script>
+(function(){
+var KEY='delarkoll.v1', st={parts:[],next:1,projects:[],sel:null,np:1}, cur=null, img=null, dgcb=null;
+try{var s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s)for(var k in s)st[k]=s[k];}catch(e){}
+function $(i){return document.getElementById(i)}
+function esc(t){return String(t||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function pad(n){return '#'+String(n).padStart(4,'0')}
+function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2800)}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(st));return true}catch(e){toast('Kunde inte spara (lagringen full?). Prova mindre bilder.');return false}}
+function newProj(name){var p={id:st.np++,name:name};st.projects.push(p);return p}
+function proj(id){return st.projects.filter(function(p){return p.id===id})[0]}
+
+/* migrering från version utan projekt */
+st.np=Math.max(st.np||1,1);
+if(!st.projects.length){
+  st.parts.forEach(function(p){
+    var n=(p.src||'Allmänt'); var pr=st.projects.filter(function(x){return x.name===n})[0]||newProj(n); p.proj=pr.id; delete p.src;
+  });
+}
+if(!st.projects.length)newProj('Mitt första projekt');
+if(!proj(st.sel))st.sel=st.projects[0].id;
+st.parts.forEach(function(p){if(!proj(p.proj))p.proj=st.projects[0].id});
+persist();
+
+function renderProj(){
+  $('proj').innerHTML=st.projects.map(function(p){
+    var n=st.parts.filter(function(x){return x.proj===p.id}).length;
+    return '<option value="'+p.id+'"'+(p.id===st.sel?' selected':'')+'>'+esc(p.name)+' ('+n+')</option>';
+  }).join('');
+}
+function render(){
+  renderProj();
+  var q=$('q').value.toLowerCase().replace('#',''), out='';
+  var l=st.parts.filter(function(p){
+    if(p.proj!==st.sel)return false;
+    return !q||(p.name+' '+p.loc+' '+p.note+' '+pad(p.id)).toLowerCase().indexOf(q)>-1;
+  }).sort(function(a,b){return b.id-a.id});
+  l.forEach(function(p){
+    out+='<div class="item" data-id="'+p.id+'">'+(p.img?'<img class="th" src="'+p.img+'" alt="">':'<div class="th">ingen bild</div>')+
+    '<div class="grow"><div class="id">'+pad(p.id)+'</div><div class="nm">'+esc(p.name)+'</div><div class="mt">'+esc(p.loc?'📍 '+p.loc:'')+'</div></div></div>';
+  });
+  var any=st.parts.some(function(p){return p.proj===st.sel});
+  $('list').innerHTML=out||'<div class="empty">'+(any?'Inga träffar.':'Inga delar i det här projektet ännu.<br>Tryck på + för att lägga till.')+'</div>';
+}
+
+/* dialog (ersätter prompt/confirm) */
+function dlg(title,msg,val,okText,cb){
+  $('dgt').textContent=title;$('dgm').textContent=msg||'';$('dgm').style.display=msg?'':'none';
+  var i=$('dgi'); i.style.display=val===null?'none':''; if(val!==null)i.value=val;
+  $('dgok').textContent=okText||'OK'; dgcb=cb; $('dg').classList.add('on'); if(val!==null)setTimeout(function(){i.focus();i.select()},50);
+}
+function dgclose(){$('dg').classList.remove('on');dgcb=null}
+$('dgno').onclick=dgclose;
+$('dgok').onclick=function(){var cb=dgcb,v=$('dgi').value.trim();dgclose();if(cb)cb(v)};
+$('dgi').onkeydown=function(e){if(e.key==='Enter')$('dgok').click()};
+
+$('proj').onchange=function(){st.sel=+this.value;persist();$('q').value='';render()};
+$('pnew').onclick=function(){dlg('Nytt projekt','Vad heter projektet?','','Skapa',function(v){if(!v)return;st.sel=newProj(v).id;persist();render()})};
+$('pren').onclick=function(){var p=proj(st.sel);dlg('Byt namn',null,p.name,'Spara',function(v){if(!v)return;p.name=v;persist();render()})};
+$('pdel').onclick=function(){
+  var p=proj(st.sel),n=st.parts.filter(function(x){return x.proj===p.id}).length;
+  dlg('Radera projekt','Radera "'+p.name+'"'+(n?' och dess '+n+' delar':'')+'? Det går inte att ångra.',null,'Radera',function(){
+    st.parts=st.parts.filter(function(x){return x.proj!==p.id});
+    st.projects=st.projects.filter(function(x){return x!==p});
+    if(!st.projects.length)newProj('Mitt första projekt');
+    st.sel=st.projects[0].id;persist();render();
+  });
+};
+
+function open(id){
+  cur=id?st.parts.filter(function(p){return p.id===id})[0]:null; img=cur?cur.img:null;
+  $('ttl').textContent=cur?pad(cur.id)+' '+cur.name:'Ny del';
+  $('f_pj').textContent='Projekt: '+proj(st.sel).name;
+  $('f_name').value=cur?cur.name:''; $('f_loc').value=cur?cur.loc:''; $('f_note').value=cur?cur.note:'';
+  $('f_img').value=''; setPrev(img);
+  var pr={};try{pr=JSON.parse(localStorage.getItem('delarkoll.prefs')||'{}')}catch(e){}
+  $('f_size').value=pr.size||'62x29'; $('f_pimg').checked=!!pr.pimg;
+  $('del').style.display=cur?'':'none';
+  $('ov').classList.add('on'); $('ov').scrollTop=0;
+}
+function setPrev(src){var p=$('prev'); if(src){p.src=src;p.style.display='block'}else{p.removeAttribute('src');p.style.display='none'}}
+function close(){$('ov').classList.remove('on')}
+
+function shrink(file,cb){
+  var r=new FileReader();
+  r.onload=function(){var i=new Image();i.onload=function(){
+    var m=720,k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');
+    c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);
+    c.getContext('2d').drawImage(i,0,0,c.width,c.height); cb(c.toDataURL('image/jpeg',.7));
+  };i.src=r.result};
+  r.readAsDataURL(file);
+}
+function save(){
+  var name=$('f_name').value.trim();
+  if(!name){toast('Ange vad delen heter.');return null}
+  var p=cur||{id:st.next++,date:new Date().toISOString(),proj:st.sel};
+  p.name=name;p.loc=$('f_loc').value.trim();p.note=$('f_note').value.trim();p.img=img;
+  if(!cur)st.parts.push(p);
+  try{localStorage.setItem('delarkoll.prefs',JSON.stringify({size:$('f_size').value,pimg:$('f_pimg').checked}))}catch(e){}
+  if(!persist())return null;
+  render(); return p;
+}
+function printLabel(p){
+  var sz=$('f_size').value.split('x');
+  $('pagestyle').textContent='@page{size:'+sz[0]+'mm '+sz[1]+'mm;margin:0}';
+  $('label').innerHTML=(($('f_pimg').checked&&p.img)?'<img src="'+p.img+'" alt="">':'')+
+    '<div><div class="lid">'+pad(p.id)+'</div><div class="ln">'+esc(p.name)+'</div>'+
+    '<div class="lm">'+esc(proj(p.proj).name)+'</div>'+(p.loc?'<div class="lm">Plats: '+esc(p.loc)+'</div>':'')+'</div>';
+  setTimeout(function(){window.print()},150);
+}
+
+$('add').onclick=function(){open(null)};
+$('q').oninput=render;
+$('list').onclick=function(e){var t=e.target.closest('.item'); if(t)open(+t.getAttribute('data-id'))};
+$('f_img').onchange=function(e){var f=e.target.files[0]; if(f)shrink(f,function(d){img=d;setPrev(d)})};
+$('cancel').onclick=close;
+$('save').onclick=function(){if(save())close()};
+$('saveprint').onclick=function(){var p=save(); if(p){close();printLabel(p)}};
+$('del').onclick=function(){var c=cur;if(!c)return;dlg('Radera del','Radera '+c.name+'?',null,'Radera',function(){st.parts=st.parts.filter(function(p){return p!==c});persist();render();close()})};
+window.__back=function(){if($('dg').classList.contains('on')){dgclose();return true}if($('ov').classList.contains('on')){close();return true}return false};
+render();
+})();
+</script>
+</body>
+</html>
