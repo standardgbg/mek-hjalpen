@@ -33,8 +33,8 @@ import java.io.File
 // med rätt etikettstorlek (läses ur @page size i sidan).
 private const val PRINT_JS = """
 window.print=function(){
-  var m=/size:\s*(\d+)mm\s+(\d+)mm/.exec((document.getElementById('pagestyle')||{}).textContent||'');
-  Android.print(m?+m[1]:62,m?+m[2]:29);
+  var m=/size:\s*([\d.]+)mm\s+([\d.]+)mm/.exec((document.getElementById('pagestyle')||{}).textContent||'');
+  Android.print(m?+m[1]:101.6,m?+m[2]:152.4);
 };
 """
 
@@ -161,13 +161,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
-        fun print(wMm: Int, hMm: Int) {
+        fun print(wMm: Double, hMm: Double) {
             runOnUiThread {
                 val pm = getSystemService(PRINT_SERVICE) as PrintManager
                 val wMils = (wMm / 25.4 * 1000).toInt()
                 val hMils = (hMm / 25.4 * 1000).toInt()
-                var size = PrintAttributes.MediaSize(
-                    "LABEL_${wMm}x$hMm", "Etikett $wMm x $hMm mm",
+                val is46 = minOf(wMm, hMm) in 100.0..103.0 && maxOf(wMm, hMm) in 151.0..154.0
+                var size = if (is46) PrintAttributes.MediaSize.NA_INDEX_4X6 else PrintAttributes.MediaSize(
+                    "LABEL_${wMils}x$hMils", "Etikett ${wMm.toInt()} x ${hMm.toInt()} mm",
                     minOf(wMils, hMils), maxOf(wMils, hMils)
                 )
                 if (wMm > hMm) size = size.asLandscape()
