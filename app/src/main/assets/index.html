@@ -16,7 +16,9 @@ header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bgt);-w
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bgt);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);z-index:6}
 h1{margin:0 0 8px;line-height:1.15;font-size:24px;font-weight:800;letter-spacing:-.01em;background:linear-gradient(90deg,var(--ac),#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 input,textarea,select{width:100%;padding:13px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
-main.wrap{padding-top:4px;padding-bottom:100px}
+main.wrap{padding-top:4px;padding-bottom:16px}
+.wrap.bk{display:flex;gap:8px;padding-top:0;padding-bottom:110px}
+.bk .btn{flex:1;font-size:15px}
 .wrap{max-width:640px;margin:0 auto;padding:0 14px}
 html{overscroll-behavior:none}
 body{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
@@ -56,14 +58,14 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
 .chk{flex:none;width:48px;height:48px;border-radius:24px;border:1px solid var(--bd);background:var(--bg);color:var(--ac);font-size:20px}
 #label{display:none;position:fixed;inset:0;align-items:center;container-type:size;overflow:hidden;color:#000;background:#fff;font-family:Arial,sans-serif}
 #label.m{display:flex;inset:auto;left:-99999px;top:0;width:var(--mw);height:var(--mh);visibility:hidden}
-#label>div{width:100%;max-height:100%;overflow:hidden;padding:3cqmin 4cqmin;overflow-wrap:anywhere}
-#label .lid{font-size:calc(var(--t,1)*28cqw);font-weight:800;line-height:1}
-#label .ln{font-size:calc(var(--t,1)*15cqw);font-weight:700;line-height:1.1;margin-top:2cqw}
-#label .lm{font-size:calc(var(--t,1)*10.5cqw);line-height:1.15;margin-top:1cqw}
+#label>div{width:100%;max-height:100%;overflow:hidden;padding:2cqmin 3cqmin;overflow-wrap:anywhere}
+#label .lid{font-size:calc(var(--t,1)*20cqw);font-weight:800;line-height:1}
+#label .ln{font-size:calc(var(--t,1)*23cqw);font-weight:700;line-height:1.05;margin-top:1cqw}
+#label .lm{font-size:calc(var(--t,1)*12cqw);line-height:1.1;margin-top:1cqw}
 @container (orientation:landscape){
-  #label .lid{font-size:calc(var(--t,1)*26cqh)}
-  #label .ln{font-size:calc(var(--t,1)*16cqh);margin-top:2cqh}
-  #label .lm{font-size:calc(var(--t,1)*11.5cqh);margin-top:1cqh}
+  #label .lid{font-size:calc(var(--t,1)*18cqh)}
+  #label .ln{font-size:calc(var(--t,1)*22cqh);margin-top:1cqh}
+  #label .lm{font-size:calc(var(--t,1)*12cqh);margin-top:1cqh}
 }
 @media print{
   body>*:not(#label){display:none!important}
@@ -85,6 +87,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
   <input id="q" type="search" placeholder="Sök i projektet (namn, plats, nummer)…">
 </div></header>
 <main id="list" class="wrap"></main>
+<div class="wrap bk"><button class="btn" id="bkx">⬆ Säkerhetskopiera</button><button class="btn" id="bki">⬇ Importera</button><input id="bkf" type="file" accept=".json,application/json" style="display:none"></div>
 <button class="fab" id="add" aria-label="Ny del">+</button>
 
 <div id="ov"><div id="sheet">
@@ -93,7 +96,6 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
   <label>Del</label><input id="f_name" placeholder="t.ex. Kondensator 470µF">
   <label>Förvaras i (låda/hylla)</label><input id="f_loc" placeholder="t.ex. Låda B3">
   <label>Anteckning</label><textarea id="f_note" rows="3"></textarea>
-  <label><input id="f_done" type="checkbox" style="width:auto"> Återmönterad</label>
   <label>Bild (valfritt, tas med kameran)</label>
   <input id="f_img" type="file" accept="image/*" capture="environment">
   <img id="prev" alt="">
@@ -107,6 +109,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
     <button class="btn p" id="save">Spara</button>
     <button class="btn" id="saveprint">Spara &amp; skriv ut</button>
     <button class="btn" id="cancel">Avbryt</button>
+    <button class="btn" id="redo">✓ Återmönterad</button>
     <button class="btn d" id="del">Radera</button>
   </div>
 </div></div>
@@ -193,7 +196,7 @@ function open(id){
   cur=id?st.parts.filter(function(p){return p.id===id})[0]:null; img=cur?cur.img:null;
   $('ttl').textContent=cur?pad(cur.id)+' '+cur.name:'Ny del';
   $('f_pj').textContent='Projekt: '+proj(st.sel).name;
-  $('f_name').value=cur?cur.name:''; $('f_loc').value=cur?cur.loc:''; $('f_note').value=cur?cur.note:''; $('f_done').checked=!!(cur&&cur.done);
+  $('f_name').value=cur?cur.name:''; $('f_loc').value=cur?cur.loc:''; $('f_note').value=cur?cur.note:''; $('redo').style.display=cur?'':'none'; $('redo').textContent=cur&&cur.done?'↩ Ej återmönterad':'✓ Återmönterad';
   $('f_img').value=''; setPrev(img);
   var pr={};try{pr=JSON.parse(localStorage.getItem('delarkoll.prefs3')||'{}')}catch(e){}
   $('f_size').value=pr.size||'101x54';if($('f_size').selectedIndex<0)$('f_size').selectedIndex=0;
@@ -216,7 +219,7 @@ function save(){
   var name=$('f_name').value.trim();
   if(!name){toast('Ange vad delen heter.');return null}
   var p=cur||{id:st.next++,date:new Date().toISOString(),proj:st.sel};
-  p.name=name;p.loc=$('f_loc').value.trim();p.note=$('f_note').value.trim();p.img=img;p.done=$('f_done').checked;
+  p.name=name;p.loc=$('f_loc').value.trim();p.note=$('f_note').value.trim();p.img=img;
   if(!cur)st.parts.push(p);
   try{localStorage.setItem('delarkoll.prefs3',JSON.stringify({size:$('f_size').value}))}catch(e){}
   if(!persist())return null;
@@ -226,12 +229,8 @@ function printLabel(p){
   var sz=$('f_size').value.split('x'),w=+sz[0],h=+sz[1],L=$('label');
   $('pagestyle').textContent='@page{size:'+w+'mm '+h+'mm;margin:0}';
   L.innerHTML='<div><div class="lid">'+pad(p.id)+'</div><div class="ln">'+esc(p.name)+'</div>'+
-    '<div class="lm">'+esc(proj(p.proj).name)+'</div>'+(p.loc?'<div class="lm">Plats: '+esc(p.loc)+'</div>':'')+'</div>';
-  L.style.setProperty('--mw',w*10+'px');L.style.setProperty('--mh',h*10+'px');
-  L.classList.add('m');
-  var d=L.firstChild,t=3;
-  while(t>0.3){L.style.setProperty('--t',t);if(d.scrollHeight<=d.clientHeight+1)break;t-=0.05}
-  L.classList.remove('m');
+    '<div class="lm">'+esc(proj(p.proj).name)+(p.loc?' · '+esc(p.loc):'')+'</div></div>';
+  window.__fit(w*39.37,h*39.37);
   setTimeout(function(){window.print()},150);
 }
 
@@ -243,9 +242,24 @@ $('list').onclick=function(e){
   var t=e.target.closest('.item'); if(t)open(+t.getAttribute('data-id'))};
 $('f_img').onchange=function(e){var f=e.target.files[0]; if(f)shrink(f,function(d){img=d;setPrev(d)})};
 $('cancel').onclick=close;
+$('bkx').onclick=function(){var j=JSON.stringify(st);
+  if(window.Android&&Android.share){Android.share(j)}
+  else{try{navigator.clipboard.writeText(j);toast('Kopierat till urklipp')}catch(e){toast('Export stöds inte här')}}};
+$('bki').onclick=function(){$('bkf').value='';$('bkf').click()};
+$('bkf').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){
+  var d;try{d=JSON.parse(r.result)}catch(x){toast('Filen kunde inte läsas');return}
+  if(!d||!d.parts||!d.projects||!d.projects.length){toast('Det är ingen säkerhetskopia');return}
+  dlg('Importera','Ersätt allt i appen med säkerhetskopian ('+d.parts.length+' delar)?',null,'Ersätt',function(){st=d;if(!proj(st.sel))st.sel=st.projects[0].id;persist();render()});
+};r.readAsText(f)};
+$('redo').onclick=function(){if(!cur)return;cur.done=!cur.done;persist();render();close()};
 $('save').onclick=function(){if(save())close()};
 $('saveprint').onclick=function(){var p=save(); if(p){close();printLabel(p)}};
 $('del').onclick=function(){var c=cur;if(!c)return;dlg('Radera del','Radera '+c.name+'?',null,'Radera',function(){st.parts=st.parts.filter(function(p){return p!==c});persist();render();close()})};
+window.__fit=function(wm,hm){var L=$('label'),d=L.firstChild;if(!d)return;
+  L.style.setProperty('--mw',wm/4+'px');L.style.setProperty('--mh',hm/4+'px');
+  L.classList.add('m');var t=3;
+  while(t>0.3){L.style.setProperty('--t',t);if(d.scrollHeight<=d.clientHeight+1)break;t-=0.05}
+  L.classList.remove('m')};
 window.__back=function(){if($('dg').classList.contains('on')){dgclose();return true}if($('ov').classList.contains('on')){close();return true}return false};
 render();
 })();

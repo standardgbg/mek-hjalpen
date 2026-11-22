@@ -1,9 +1,14 @@
 package se.mekhjalpen
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
+import android.print.PageRange
 import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
 import android.print.PrintManager
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
@@ -140,6 +145,22 @@ class MainActivity : AppCompatActivity() {
 
     inner class Bridge {
         @JavascriptInterface
+        fun share(json: String) {
+            runOnUiThread {
+                val dir = File(cacheDir, "backup").apply { mkdirs() }
+                val f = File(dir, "mek-hjalpen-sakerhetskopia.json")
+                f.writeText(json)
+                val uri = FileProvider.getUriForFile(this@MainActivity, "$packageName.fileprovider", f)
+                val i = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/json"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(Intent.createChooser(i, "Spara säkerhetskopia"))
+            }
+        }
+
+        @JavascriptInterface
         fun print(wMm: Int, hMm: Int) {
             runOnUiThread {
                 val pm = getSystemService(PRINT_SERVICE) as PrintManager
@@ -154,7 +175,33 @@ class MainActivity : AppCompatActivity() {
                     .setMediaSize(size)
                     .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
                     .build()
-                pm.print("Mek-hjälpen etikett", web.createPrintDocumentAdapter("etikett"), attrs)
+                val inner = web.createPrintDocumentAdapter("etikett")
+                // Anpassa textstorleken efter den pappersstorlek som faktiskt är vald i dialogen
+                val adapter = object : PrintDocumentAdapter() {
+                    override fun onStart() = inner.onStart()
+                    override fun onLayout(
+                        oldAttributes: PrintAttributes?,
+                        newAttributes: PrintAttributes,
+                        cancellationSignal: CancellationSignal?,
+                        callback: LayoutResultCallback,
+                        extras: Bundle?
+                    ) {
+                        val ms = newAttributes.mediaSize
+                        val w = ms?.widthMils ?: wMils
+                        val h = ms?.heightMils ?: hMils
+                        web.evaluateJavascript("window.__fit&&window.__fit($w,$h)") {
+                            inner.onLayout(oldAttributes, newAttributes, cancellationSignal, callback, extras)
+                        }
+                    }
+                    override fun onWrite(
+                        pages: Array<out PageRange>,
+                        destination: ParcelFileDescriptor,
+                        cancellationSignal: CancellationSignal?,
+                        callback: WriteResultCallback
+                    ) = inner.onWrite(pages, destination, cancellationSignal, callback)
+                    override fun onFinish() = inner.onFinish()
+                }
+                pm.print("Mek-hjälpen etikett", adapter, attrs)
             }
         }
     }

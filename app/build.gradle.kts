@@ -11,13 +11,25 @@ android {
         applicationId = "se.mekhjalpen"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.5"
+        versionCode = 7
+        versionName = "1.6"
     }
 
+    signingConfigs {
+        create("mek") {
+            storeFile = file("mek.keystore")
+            storePassword = "mekhjalpen"
+            keyAlias = "mek"
+            keyPassword = "mekhjalpen"
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("mek")
+        }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("mek")
         }
     }
     compileOptions {
