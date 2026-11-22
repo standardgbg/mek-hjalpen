@@ -53,11 +53,14 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
 #dgc h2{margin:0 0 6px;font-size:18px}
 #dgm{color:var(--mut);margin:0 0 10px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:10px;display:none;z-index:40;max-width:90%}
+#zv{position:fixed;inset:0;background:#000;z-index:50;display:none;touch-action:none;overflow:hidden}#zv.on{display:block}
+#zi{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none}
+#zx{position:fixed;top:12px;right:12px;z-index:51;width:48px;padding:0}
 .item.done{opacity:.6}.item.done .nm{text-decoration:line-through}
 .tag{background:var(--ac);color:var(--acx);border-radius:6px;padding:2px 7px;font-size:13px;margin-left:6px;font-weight:600}
 .chk{flex:none;width:48px;height:48px;border-radius:24px;border:1px solid var(--bd);background:var(--bg);color:var(--ac);font-size:20px}
-#label{display:none;position:fixed;inset:0;align-items:center;container-type:size;overflow:hidden;color:#000;background:#fff;font-family:Arial,sans-serif}
-#label.m{display:flex;inset:auto;left:-99999px;top:0;width:var(--mw);height:var(--mh);visibility:hidden}
+#label{display:none;position:fixed;left:0;top:0;width:min(100%,calc(100vh*var(--arn,1.6)));aspect-ratio:var(--arn,1.6);align-items:center;container-type:size;overflow:hidden;color:#000;background:#fff;font-family:Arial,sans-serif}
+#label.m{display:flex;left:-99999px;top:0;width:1000px;height:auto;visibility:hidden}
 #label>div{width:100%;max-height:100%;overflow:hidden;padding:2cqmin 3cqmin;overflow-wrap:anywhere}
 #label .lid{font-size:calc(var(--t,1)*20cqw);font-weight:800;line-height:1}
 #label .ln{font-size:calc(var(--t,1)*23cqw);font-weight:700;line-height:1.05;margin-top:1cqw}
@@ -71,7 +74,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
   body>*:not(#label){display:none!important}
   body{background:#fff}
   body::before,body::after{display:none!important}
-  #label{display:flex!important;inset:0;left:0;width:auto;height:auto}
+  #label{display:flex!important}
 }
 </style>
 </head>
@@ -96,14 +99,14 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
   <label>Del</label><input id="f_name" placeholder="t.ex. Kondensator 470µF">
   <label>Förvaras i (låda/hylla)</label><input id="f_loc" placeholder="t.ex. Låda B3">
   <label>Anteckning</label><textarea id="f_note" rows="3"></textarea>
-  <label>Bild (valfritt, tas med kameran)</label>
-  <input id="f_img" type="file" accept="image/*" capture="environment">
+  <input id="f_img" type="file" accept="image/*" capture="environment" style="display:none">
+  <button class="btn p" id="cam" type="button" style="width:100%;margin-top:12px">📷 Lägg till en bild</button>
   <img id="prev" alt="">
   <label>Etikettstorlek</label>
   <select id="f_size">
     <option value="101x54">Dymo 99014 – 101 × 54 mm liggande</option>
     <option value="54x101">Dymo 99014 – 54 × 101 mm stående</option>
-    <option value="80x50">Epson TM-T88V – 80 mm kvitto</option>
+    <option value="80x60">Epson TM-T88V – 80 mm kvitto</option>
   </select>
   <div class="row">
     <button class="btn p" id="save">Spara</button>
@@ -120,6 +123,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
   <div class="row"><button class="btn p" id="dgok">OK</button><button class="btn" id="dgno">Avbryt</button></div>
 </div></div>
 <div id="toast"></div>
+<div id="zv"><img id="zi" alt=""><button class="btn" id="zx" aria-label="Stäng">✕</button></div>
 <div id="label"></div>
 <style id="pagestyle"></style>
 
@@ -203,7 +207,7 @@ function open(id){
   $('del').style.display=cur?'':'none';
   $('ov').classList.add('on'); $('ov').scrollTop=0;
 }
-function setPrev(src){var p=$('prev'); if(src){p.src=src;p.style.display='block'}else{p.removeAttribute('src');p.style.display='none'}}
+function setPrev(src){var p=$('prev'); $('cam').textContent=src?'📷 Ta en ny bild':'📷 Lägg till en bild'; if(src){p.src=src;p.style.display='block'}else{p.removeAttribute('src');p.style.display='none'}}
 function close(){$('ov').classList.remove('on')}
 
 function shrink(file,cb){
@@ -230,18 +234,34 @@ function printLabel(p){
   $('pagestyle').textContent='@page{size:'+w+'mm '+h+'mm;margin:0}';
   L.innerHTML='<div><div class="lid">'+pad(p.id)+'</div><div class="ln">'+esc(p.name)+'</div>'+
     '<div class="lm">'+esc(proj(p.proj).name)+(p.loc?' · '+esc(p.loc):'')+'</div></div>';
-  window.__fit(w*39.37,h*39.37);
+  L.style.setProperty('--arn',w/h);window.__fit();
   setTimeout(function(){window.print()},150);
 }
 
 $('add').onclick=function(){open(null)};
 $('q').oninput=render;
 $('list').onclick=function(e){
+  var im=e.target.closest('img.th');if(im){zOpen(im.src);return}
   var c=e.target.closest('.chk');
   if(c){var id=+c.getAttribute('data-t'),p=st.parts.filter(function(x){return x.id===id})[0];if(p){p.done=!p.done;persist();render()}return}
   var t=e.target.closest('.item'); if(t)open(+t.getAttribute('data-id'))};
 $('f_img').onchange=function(e){var f=e.target.files[0]; if(f)shrink(f,function(d){img=d;setPrev(d)})};
 $('cancel').onclick=close;
+$('cam').onclick=function(){$('f_img').click()};
+$('prev').onclick=function(){zOpen(this.src)};
+var Z={s:1,x:0,y:0},Z0={x:0,y:0},ptr={},d0=0,s0=1,last=0,zv=$('zv');
+function zApply(){$('zi').style.transform='translate('+Z.x+'px,'+Z.y+'px) scale('+Z.s+')'}
+function zOpen(src){var i=$('zi');i.onload=function(){var W=innerWidth,H=innerHeight,k=Math.min(W/i.naturalWidth,H/i.naturalHeight);i.style.width=i.naturalWidth*k+'px';i.style.height=i.naturalHeight*k+'px';Z0={x:(W-i.naturalWidth*k)/2,y:(H-i.naturalHeight*k)/2};Z={s:1,x:Z0.x,y:Z0.y};zApply()};zv.classList.add('on');i.src=src;if(i.complete&&i.naturalWidth)i.onload()}
+function zAt(cx,cy,ns){ns=Math.max(1,Math.min(8,ns));var r=ns/Z.s;Z.x=cx-(cx-Z.x)*r;Z.y=cy-(cy-Z.y)*r;Z.s=ns;if(ns===1){Z.x=Z0.x;Z.y=Z0.y}zApply()}
+zv.onpointerdown=function(e){if(e.target.id==='zx')return;zv.setPointerCapture(e.pointerId);ptr[e.pointerId]={x:e.clientX,y:e.clientY};var k=Object.keys(ptr);
+  if(k.length===2){var a=ptr[k[0]],b=ptr[k[1]];d0=Math.hypot(a.x-b.x,a.y-b.y);s0=Z.s}
+  else if(Date.now()-last<300){zAt(e.clientX,e.clientY,Z.s>1.5?1:3)}
+  last=Date.now()};
+zv.onpointermove=function(e){var p=ptr[e.pointerId];if(!p)return;var k=Object.keys(ptr);
+  if(k.length===2){ptr[e.pointerId]={x:e.clientX,y:e.clientY};var a=ptr[k[0]],b=ptr[k[1]];zAt((a.x+b.x)/2,(a.y+b.y)/2,s0*Math.hypot(a.x-b.x,a.y-b.y)/d0)}
+  else{Z.x+=e.clientX-p.x;Z.y+=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;zApply()}};
+zv.onpointerup=zv.onpointercancel=function(e){delete ptr[e.pointerId]};
+$('zx').onclick=function(){zv.classList.remove('on')};
 $('bkx').onclick=function(){var j=JSON.stringify(st);
   if(window.Android&&Android.share){Android.share(j)}
   else{try{navigator.clipboard.writeText(j);toast('Kopierat till urklipp')}catch(e){toast('Export stöds inte här')}}};
@@ -255,12 +275,11 @@ $('redo').onclick=function(){if(!cur)return;cur.done=!cur.done;persist();render(
 $('save').onclick=function(){if(save())close()};
 $('saveprint').onclick=function(){var p=save(); if(p){close();printLabel(p)}};
 $('del').onclick=function(){var c=cur;if(!c)return;dlg('Radera del','Radera '+c.name+'?',null,'Radera',function(){st.parts=st.parts.filter(function(p){return p!==c});persist();render();close()})};
-window.__fit=function(wm,hm){var L=$('label'),d=L.firstChild;if(!d)return;
-  L.style.setProperty('--mw',wm/4+'px');L.style.setProperty('--mh',hm/4+'px');
+window.__fit=function(){var L=$('label'),d=L.firstChild;if(!d)return;
   L.classList.add('m');var t=3;
   while(t>0.3){L.style.setProperty('--t',t);if(d.scrollHeight<=d.clientHeight+1)break;t-=0.05}
   L.classList.remove('m')};
-window.__back=function(){if($('dg').classList.contains('on')){dgclose();return true}if($('ov').classList.contains('on')){close();return true}return false};
+window.__back=function(){if($('zv').classList.contains('on')){$('zv').classList.remove('on');return true}if($('dg').classList.contains('on')){dgclose();return true}if($('ov').classList.contains('on')){close();return true}return false};
 render();
 })();
 </script>
