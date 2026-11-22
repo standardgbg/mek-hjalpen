@@ -166,12 +166,8 @@ class MainActivity : AppCompatActivity() {
                 val pm = getSystemService(PRINT_SERVICE) as PrintManager
                 val wMils = (wMm / 25.4 * 1000).toInt()
                 val hMils = (hMm / 25.4 * 1000).toInt()
-                val is46 = minOf(wMm, hMm) in 100.0..103.0 && maxOf(wMm, hMm) in 151.0..154.0
-                var size = if (is46) PrintAttributes.MediaSize.NA_INDEX_4X6 else PrintAttributes.MediaSize(
-                    "LABEL_${wMils}x$hMils", "Etikett ${wMm.toInt()} x ${hMm.toInt()} mm",
-                    minOf(wMils, hMils), maxOf(wMils, hMils)
-                )
-                if (wMm > hMm) size = size.asLandscape()
+                // Be alltid Android om standardpappret 4 x 6 tum (stående)
+                val size = PrintAttributes.MediaSize.NA_INDEX_4X6
                 val attrs = PrintAttributes.Builder()
                     .setMediaSize(size)
                     .setMinMargins(PrintAttributes.Margins.NO_MARGINS)

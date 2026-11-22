@@ -103,8 +103,6 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
   <img id="prev" alt="">
   <label>Etikettstorlek</label>
   <select id="f_size">
-    <option value="101.6x152.4">4 × 6 tum stående (standard)</option>
-    <option value="152.4x101.6">6 × 4 tum liggande</option>
     <option value="101x54">Dymo 99014 – 101 × 54 mm liggande</option>
     <option value="54x101">Dymo 99014 – 54 × 101 mm stående</option>
     <option value="80x60">Epson TM-T88V – 80 mm kvitto</option>
@@ -204,7 +202,7 @@ function open(id){
   $('f_name').value=cur?cur.name:''; $('f_loc').value=cur?cur.loc:''; $('f_note').value=cur?cur.note:''; $('redo').style.display=cur?'':'none'; $('redo').textContent=cur&&cur.done?'↩ Ej återmönterad':'✓ Återmönterad';
   $('f_img').value=''; setPrev(img);
   var pr={};try{pr=JSON.parse(localStorage.getItem('delarkoll.prefs4')||'{}')}catch(e){}
-  $('f_size').value=pr.size||'101.6x152.4';if($('f_size').selectedIndex<0)$('f_size').selectedIndex=0;
+  $('f_size').value=pr.size||'101x54';if($('f_size').selectedIndex<0)$('f_size').selectedIndex=0;
   $('del').style.display=cur?'':'none';
   $('ov').classList.add('on'); $('ov').scrollTop=0;
 }
@@ -277,7 +275,7 @@ $('list').onclick=function(e){
 $('f_img').onchange=function(e){var f=e.target.files[0]; if(f)shrink(f,function(d){img=d;setPrev(d)})};
 $('cancel').onclick=close;
 $('bkt').onclick=function(){$('tp_size').innerHTML=$('f_size').innerHTML;var pr={};try{pr=JSON.parse(localStorage.getItem('delarkoll.prefs4')||'{}')}catch(e){}
-  $('tp_size').value=pr.size||'101.6x152.4';if($('tp_size').selectedIndex<0)$('tp_size').selectedIndex=0;
+  $('tp_size').value=pr.size||'101x54';if($('tp_size').selectedIndex<0)$('tp_size').selectedIndex=0;
   $('tp').classList.add('on');setTimeout(function(){$('tp_t').focus()},50)};
 $('tp_no').onclick=function(){$('tp').classList.remove('on')};
 $('tp_ok').onclick=function(){var t=$('tp_t').value.trim();if(!t){toast('Skriv något att skriva ut.');return}
